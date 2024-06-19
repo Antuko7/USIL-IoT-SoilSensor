@@ -3,44 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Visualización de Datos</title>
-  <style>
-    /* Estilos CSS para dar formato a la página */
-    body {
-      font-family: Arial, sans-serif;
-    }
-    #map {
-      height: 400px;
-      width: 100%;
-    }
-  </style>
-  <!-- Enlace a la biblioteca Leaflet y al estilo predeterminado de OpenStreetMap -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <title>Datos de Sensores</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-  <h1>Visualización de Datos</h1>
-  <div id="map"></div>
-  <h2>Datos del GPS</h2>
-  <p id="gpsData"></p>
-  <h2>Datos del Sensor de Humedad</h2>
-  <p id="humidityData"></p>
+  <div class="container">
+    <h1>Datos de Sensores</h1>
+    <div class="sensor-data">
+      <h2>Datos de Humedad de Suelo</h2>
+      <p id="humidityData">-- %</p>
+    </div>
+    <div class="sensor-data">
+      <h2>Ubicación GPS</h2>
+      <p id="latitude">--</p>
+      <p id="longitude">--</p>
+      <p id="altitude">-- metros</p>
+    </div>
+  </div>
 
-  <!-- Script de JavaScript para obtener y mostrar los datos -->
   <script>
-    // Función para obtener los datos del servidor
+    // Función para obtener y mostrar los datos
     function getData() {
       fetch('/data') // Ruta para obtener los datos del servidor
         .then(response => response.json())
         .then(data => {
-          // Mostrar los datos del GPS
-          document.getElementById('gpsData').innerText = `Latitud: ${data.lat}, Longitud: ${data.lng}, Velocidad: ${data.speed} km/h`;
+          // Mostrar los datos de humedad de suelo
+          document.getElementById('humidityData').innerText = `${data.humidity}%`;
 
-          // Mostrar los datos del sensor de humedad
-          document.getElementById('humidityData').innerText = `Humedad: ${data.humidity}%`;
-
-          // Actualizar la posición del marcador en el mapa
-          updateMarker(data.lat, data.lng);
+          // Mostrar los datos de ubicación GPS
+          document.getElementById('latitude').innerText = `Latitud: ${data.lat}`;
+          document.getElementById('longitude').innerText = `Longitud: ${data.lng}`;
+          document.getElementById('altitude').innerText = `Altitud: ${data.alt} metros`;
         })
         .catch(error => console.error('Error al obtener los datos:', error));
     }
@@ -50,24 +43,6 @@
 
     // Actualizar los datos cada 5 segundos
     setInterval(getData, 5000);
-
-    // Inicializar el mapa de Leaflet
-    var map = L.map('map').setView([-12.0762, -76.9530], 13); // Posición inicial del mapa (La Molina, Lima)
-
-    // Agregar capa de OpenStreetMap al mapa
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // Inicializar marcador en el mapa
-    var marker = L.marker([0, 0]).addTo(map);
-
-    // Función para actualizar la posición del marcador en el mapa
-    function updateMarker(lat, lng) {
-      marker.setLatLng([lat, lng]).update();
-      map.setView([lat, lng], 13); // Centrar el mapa en la nueva posición
-    }
   </script>
 </body>
 </html>
-
